@@ -2,6 +2,14 @@
 
 All notable changes to the Verto project will be documented in this file.
 
+## [1.0.1] - 2026-07-22 00:40
+
+### Added
+- Created a comprehensive root-level `README.md` containing a Mermaid system flow schematic, interface metrics, and build guidelines.
+
+### Removed
+- Expunged the redundant boilerplate `README.md` from the `Machina/verto-core/` directory.
+
 ## [1.0.0] - 2026-07-22 00:35
 
 ### Added
