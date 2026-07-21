@@ -1,0 +1,31 @@
+# Verto Root Gitignore
+
+# Node dependencies
+node_modules/
+**/node_modules/
+
+# Production / Electron outputs
+dist/
+**/dist/
+release/
+**/release/
+
+# Local configuration & telemetry temp files
+public/sysinfo.json
+ready.tmp
+*.tmp
+*.log
+
+# System & OS Files
+desktop.ini
+Thumbs.db
+.DS_Store
+
+# Editor Configurations
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

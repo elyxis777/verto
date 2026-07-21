@@ -1,0 +1,44 @@
+@import url('https://fonts.googleapis.com/css2?family=Audiowide&family=Space+Mono&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-c-dark: #29353C;
+  --color-c-slate: #44576D;
+  --color-c-steel: #768A96;
+  --color-c-sky: #AAC7D8;
+  --color-c-ice: #DFEBF6;
+  --color-c-white: #E6E6E6;
+  --font-sans: 'Audiowide', sans-serif;
+  --font-mono: 'Space Mono', monospace;
+}
+
+@layer base {
+  body {
+    @apply bg-c-dark text-c-ice font-sans overflow-hidden antialiased;
+  }
+}
+
+@layer utilities {
+  .hud-scanline {
+    background: linear-gradient(to bottom, rgba(170, 199, 216, 0) 50%, rgba(170, 199, 216, 0.02) 50%);
+    background-size: 100% 4px;
+    pointer-events: none;
+  }
+
+  .mono-ui {
+    @apply font-mono text-[0.6rem] uppercase tracking-[0.2em];
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 2px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(118, 138, 150, 0.05);
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(170, 199, 216, 0.3);
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(170, 199, 216, 0.5);
+  }
+}
