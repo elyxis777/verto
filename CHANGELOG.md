@@ -2,6 +2,13 @@
 
 All notable changes to the Verto project will be documented in this file.
 
+## [1.0.2] - 2026-11-08 10:05
+
+### Fixed
+- Fixed `ready.tmp` file handle lock collision during engine shutdown by piping stdout/stderr directly instead of maintaining an unread disk buffer.
+- Corrected terminal window stealth suppression in `Vertex_Launch.bat` to target the active console hierarchy (conhost & Windows Terminal) without creating orphan VBS scripts.
+- Hardened exit monitoring loop to perform immediate PID cleanup upon port deallocation.
+
 ## [1.0.1] - 2026-07-22 00:40
 
 ### Added

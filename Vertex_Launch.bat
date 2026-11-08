@@ -20,13 +20,11 @@ powershell -Command "$cpu = (Get-CimInstance Win32_Processor).Name; $ram = [Math
 
 :: Start Vite on a fixed port
 echo [VERTEX] Starting Fundamentum Engine on Port %PORT%...
-:: Using a temporary file to signal ready state
-if exist "ready.tmp" del ready.tmp
-start /b cmd /c "npx vite --port %PORT% --strictPort > ready.tmp 2>&1"
+start /b cmd /c "npx vite --port %PORT% --strictPort >nul 2>&1"
 
 echo [VERTEX] Stabilizing Nuntius Protocol...
 :WAIT_LOOP
-timeout /t 1 /nobreak >nul
+ping 127.0.0.1 -n 2 >nul
 netstat -ano | findstr :%PORT% | findstr LISTENING >nul
 if errorlevel 1 (
     echo [VERTEX] Waiting for engine stability...
@@ -38,18 +36,15 @@ echo [VERTEX] Launching Visus...
 start msedge --app=http://localhost:%PORT% || start http://localhost:%PORT%
 
 echo [VERTEX] Machina Active. Entering Stealth Mode.
-:: Using a hidden VBS to suppress the terminal
-echo Set oShell = CreateObject("WScript.Shell") > hide.vbs
-echo oShell.Run "powershell -Command ""Add-Type -Name W -Namespace C -MemberDefinition '[DllImport(\""user32.dll\"")]public static extern bool ShowWindow(IntPtr h,int n);[DllImport(\""kernel32.dll\"")]public static extern IntPtr GetConsoleWindow();'; [C.W]::ShowWindow([C.W]::GetConsoleWindow(),0)""", 0, False >> hide.vbs
-wscript.exe hide.vbs
-del hide.vbs
+:: Suppress terminal window (conhost & Windows Terminal)
+powershell -Command "Add-Type -Name W -Namespace C -MemberDefinition '[DllImport(\"user32.dll\")]public static extern bool ShowWindow(IntPtr h,int n);[DllImport(\"kernel32.dll\")]public static extern IntPtr GetConsoleWindow();'; [C.W]::ShowWindow([C.W]::GetConsoleWindow(), 0); $p = Get-Process -Id $PID; while ($p.ParentProcessId -and $p.ProcessName -ne 'explorer') { $p = Get-Process -Id $p.ParentProcessId -ErrorAction SilentlyContinue; if ($p -and $p.MainWindowHandle -ne [IntPtr]::Zero) { [C.W]::ShowWindow($p.MainWindowHandle, 0); break } }" >nul 2>&1
 
 :: Monitoring loop: Keep hidden terminal alive until server dies
 :MONITOR
-timeout /t 5 /nobreak >nul
+ping 127.0.0.1 -n 4 >nul
 netstat -ano | findstr :%PORT% | findstr LISTENING >nul
 if not errorlevel 1 goto MONITOR
 
 :: Cleanup and Exit
-if exist "ready.tmp" del ready.tmp
+for /f "tokens=5" %%a in ('netstat -aon ^| findstr :%PORT% ^| findstr LISTENING') do taskkill /f /pid %%a >nul 2>&1
 exit
