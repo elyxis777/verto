@@ -80,9 +80,6 @@ export default function App() {
 
   const loadFundamentum = async () => {
     try {
-      if (typeof window !== 'undefined' && !window.crossOriginIsolated) {
-        throw new Error('Security Protocol Violation: SharedArrayBuffer inactive. Cross-Origin Isolation required.');
-      }
       const baseURL = window.location.origin;
       await ffmpeg.load({
         coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),

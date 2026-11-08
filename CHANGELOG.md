@@ -2,6 +2,12 @@
 
 All notable changes to the Verto project will be documented in this file.
 
+## [1.0.3] - 2026-11-08 10:10
+
+### Fixed
+- Enforced `Cross-Origin-Embedder-Policy: require-corp` and `Cross-Origin-Opener-Policy: same-origin` globally across all Vite dev server response streams via dedicated middleware.
+- Excised redundant `window.crossOriginIsolated` guard in `App.jsx` that prematurely failed single-threaded WebAssembly execution.
+
 ## [1.0.2] - 2026-11-08 10:05
 
 ### Fixed
