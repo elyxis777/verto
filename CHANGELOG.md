@@ -2,6 +2,13 @@
 
 All notable changes to the Verto project will be documented in this file.
 
+## [1.0.6] - 2026-11-15 20:56
+
+### Added
+- Linked GitHub repository `elyxis777/verto` to Vercel team `elyxis`.
+- Deployed production release to Vercel with automated Vite build pipeline.
+- Production domains active: `https://verto-eta.vercel.app` and `https://verto-elyxis.vercel.app`.
+
 ## [1.0.5] - 2026-11-15 15:26
 
 ### Added

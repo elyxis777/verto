@@ -109,9 +109,9 @@ Since the entire engine runs on the user's hardware, **your hosting cost on Verc
 - [x] Add a subtle "Buy Me a Coffee / Sponsor" button in the footer.
 
 ### Phase 3: Deployment & Domain Setup
-- [ ] Push the clean web build to a private/public GitHub repository.
-- [ ] Link repository to Vercel (free tier).
-- [ ] Verify live domain deployment (e.g., `verto-converter.vercel.app` or custom domain).
+- [x] Push the clean web build to a private/public GitHub repository.
+- [x] Link repository to Vercel (free tier).
+- [x] Verify live domain deployment (e.g., `verto-converter.vercel.app` or custom domain).
 
 ### Phase 4: Organic Launch & Community Seeding
 - [ ] **Reddit:** Share a direct post on `r/InternetIsBeautiful` and `r/webdev`:  
