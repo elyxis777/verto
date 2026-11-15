@@ -2,6 +2,23 @@
 
 All notable changes to the Verto project will be documented in this file.
 
+## [1.0.5] - 2026-11-15 15:26
+
+### Added
+- Integrated privacy, zero-upload, and uncapped RAM processing trust badges directly above the central ingestion dropzone.
+- Added responsive quick-format pills for mobile viewports alongside the existing desktop format stream.
+- Injected placeholder sponsor button in the application sidebar footer.
+- Updated HTML document metadata, open graph tags, and page titles for search engine indexation.
+
+## [1.0.4] - 2026-11-15 15:20
+
+### Added
+- Created `vercel.json` with strict Cross-Origin Isolation headers (`COOP: same-origin`, `COEP: require-corp`) for production deployment.
+
+### Fixed
+- Hardened unload beacon dispatch in `App.jsx` with exception suppression for cross-origin or standalone web clients.
+- Corrected path mapping in `DEPLOYMENT_PLAN.md` referencing `Machina/verto-core`.
+
 ## [1.0.3] - 2026-11-08 10:10
 
 ### Fixed

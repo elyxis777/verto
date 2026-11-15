@@ -2,7 +2,8 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { 
   Upload, Download, RefreshCw, AlertCircle, 
   FileAudio, FileVideo, Cpu, Zap, Image as ImageIcon, 
-  Search, Check, X, Activity, HardDrive, Maximize2, Info, Power
+  Search, Check, X, Activity, HardDrive, Maximize2, Info, Power,
+  ShieldCheck, Coffee, Infinity as InfinityIcon
 } from 'lucide-react';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile, toBlobURL } from '@ffmpeg/util';
@@ -37,7 +38,9 @@ export default function App() {
 
   useEffect(() => {
     const handleUnload = () => {
-      navigator.sendBeacon('/api/kill');
+      try {
+        navigator.sendBeacon('/api/kill');
+      } catch (_) {}
     };
     window.addEventListener('beforeunload', handleUnload);
 
@@ -349,12 +352,70 @@ export default function App() {
                 ))}
               </div>
             </div>
+
+            {/* Mobile Format Quick Selector */}
+            <div className="md:hidden flex flex-col gap-2 mb-4">
+              <div className="flex items-center justify-between">
+                <label className="mono-ui text-c-steel opacity-50 text-[0.6rem]">Target Format</label>
+                <button onClick={() => setShowMatrix(true)} className="mono-ui text-c-sky text-[0.6rem] hover:underline flex items-center gap-1">All ({FORMAT_MATRIX[activeCategory].length})</button>
+              </div>
+              <div className="flex gap-1 overflow-x-auto pb-1 custom-scrollbar">
+                {FORMAT_MATRIX[activeCategory].slice(0, 5).map(fmt => (
+                  <button 
+                    key={fmt.id} 
+                    onClick={() => setSelectedFormat(fmt)} 
+                    className={`px-3 py-1.5 text-[0.6rem] font-mono border whitespace-nowrap rounded-sm ${selectedFormat?.id === fmt.id ? 'bg-c-sky text-c-dark border-c-sky font-bold' : 'border-c-steel/30 text-c-steel hover:bg-white/5'}`}
+                  >
+                    .{fmt.ext}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Sponsor / Coffee Footer Link */}
+            <div className="pt-4 border-t border-c-steel/10 flex items-center justify-between">
+              <button 
+                type="button"
+                onClick={() => alert("Sponsorship conduit initializing soon. Thank you for supporting Verto's local-first architecture.")}
+                className="flex items-center gap-2 text-c-steel hover:text-amber-300 transition-colors group cursor-pointer"
+                title="Support independent open-source WASM development (Coming Soon)"
+              >
+                <Coffee className="w-3.5 h-3.5 group-hover:scale-110 transition-transform text-amber-400" />
+                <span className="mono-ui text-[0.55rem] tracking-wider uppercase">Sponsor Engine</span>
+              </button>
+              <span className="mono-ui text-[0.5rem] text-c-steel/40">100% Client-Side</span>
+            </div>
           </div>
 
           <div className="flex-grow p-6 md:p-12 flex flex-col relative bg-c-ice/[0.01] overflow-y-auto custom-scrollbar">
             {appState === 'loading' && <div className="flex-grow flex flex-col items-center justify-center space-y-6"><RefreshCw className="w-16 h-16 text-c-sky animate-spin opacity-50" /><div className="text-center"><p className="text-lg font-mono text-c-sky tracking-[0.5em] uppercase mb-2">{statusText}</p></div></div>}
             {appState === 'idle' && (
               <div className="flex-grow flex flex-col">
+                {/* Trust Badges */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6 shrink-0">
+                  <div className="flex items-center gap-2.5 p-3 bg-white/[0.02] border border-c-steel/20 rounded-sm">
+                    <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <div className="text-left">
+                      <p className="mono-ui text-emerald-400 font-bold text-[0.6rem] uppercase tracking-wider">100% Private</p>
+                      <p className="text-[0.55rem] text-c-steel leading-tight">Files never leave machine</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2.5 p-3 bg-white/[0.02] border border-c-steel/20 rounded-sm">
+                    <Zap className="w-4 h-4 text-c-sky shrink-0" />
+                    <div className="text-left">
+                      <p className="mono-ui text-c-sky font-bold text-[0.6rem] uppercase tracking-wider">Instant Start</p>
+                      <p className="text-[0.55rem] text-c-steel leading-tight">Zero upload wait times</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2.5 p-3 bg-white/[0.02] border border-c-steel/20 rounded-sm">
+                    <InfinityIcon className="w-4 h-4 text-cyan-300 shrink-0" />
+                    <div className="text-left">
+                      <p className="mono-ui text-cyan-300 font-bold text-[0.6rem] uppercase tracking-wider">No Size Caps</p>
+                      <p className="text-[0.55rem] text-c-steel leading-tight">Direct RAM processing</p>
+                    </div>
+                  </div>
+                </div>
+
                 <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileSelect} />
                 <div onDragOver={(e) => e.preventDefault()} onDrop={handleFileDrop} onClick={() => fileInputRef.current?.click()} className="flex-grow border-2 border-dashed border-c-steel/30 flex flex-col items-center justify-center cursor-pointer group hover:bg-c-sky/5 hover:border-c-sky transition-all rounded-sm min-h-[300px]">
                   <Upload className="w-16 md:w-24 h-16 md:h-24 text-c-sky/20 group-hover:text-c-sky mb-8" />
