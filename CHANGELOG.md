@@ -2,6 +2,11 @@
 
 All notable changes to the Verto project will be documented in this file.
 
+## [1.0.7] - 2026-11-15 21:06
+
+### Fixed
+- Appended `-vn` (disable video/cover art stream) to all audio transduction presets in `matrix.js`. Resolves MP3 embedded cover art collision failing M4A/AAC, WAV, FLAC, and OGG container creation.
+
 ## [1.0.6] - 2026-11-15 20:56
 
 ### Added
