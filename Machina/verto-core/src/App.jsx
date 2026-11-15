@@ -44,22 +44,38 @@ export default function App() {
     };
     window.addEventListener('beforeunload', handleUnload);
 
-    const fetchSystemInfo = async () => {
+    const fetchSystemInfo = () => {
       try {
-        const response = await fetch('/sysinfo.json');
-        if (response.ok) {
-          const data = await response.json();
-          const rawCpu = data.cpu || 'Unknown CPU';
-          const rawRam = data.ram || '??';
-          const rawGpu = data.gpu || 'Unknown GPU';
-          const cpu = typeof rawCpu === 'string' ? rawCpu.replace(/@.*$/, '').trim() : rawCpu;
-          const gpu = typeof rawGpu === 'string' 
-            ? rawGpu.replace(/ANGLE \(.*\)/g, '').replace(/Direct3D.*/g, '').replace(/Intel\(R\)/g, '').trim().toUpperCase() 
-            : rawGpu;
-          setSystemSpecs({ core: `${cpu} | ${rawRam}GB RAM`, gpu });
-        }
+        const cores = navigator.hardwareConcurrency ? `${navigator.hardwareConcurrency} Logical Cores` : 'Client Hardware Active';
+        const memory = navigator.deviceMemory ? `~${navigator.deviceMemory}GB Device RAM` : 'RAM: In-Browser SharedBuffer';
+        
+        let renderer = 'Browser WebAssembly Core';
+        try {
+          const canvas = document.createElement('canvas');
+          const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+          if (gl) {
+            const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+            if (debugInfo) {
+              const unmasked = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+              if (unmasked) {
+                renderer = unmasked
+                  .replace(/ANGLE \(.*\)/g, '')
+                  .replace(/Direct3D.*/g, '')
+                  .replace(/Intel\(R\)/g, '')
+                  .replace(/NVIDIA GeForce/g, 'GeForce')
+                  .trim()
+                  .toUpperCase() || renderer;
+              }
+            }
+          }
+        } catch (_) {}
+
+        setSystemSpecs({
+          core: `${cores} | ${memory}`,
+          gpu: renderer
+        });
       } catch (e) {
-        console.error("Hardware Telemetry Breach:", e);
+        setSystemSpecs({ core: 'Client Hardware: Active', gpu: 'WebAssembly WASM Threading' });
       }
     };
     fetchSystemInfo();

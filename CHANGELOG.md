@@ -2,6 +2,14 @@
 
 All notable changes to the Verto project will be documented in this file.
 
+## [1.0.8] - 2026-11-15 21:26
+
+### Removed
+- Expunged static host telemetry payload (`sysinfo.json`).
+
+### Changed
+- Refactored hardware telemetry in `App.jsx` to dynamically query the visiting client's browser environment using `navigator.hardwareConcurrency`, `navigator.deviceMemory`, and unmasked WebGL rendering context.
+
 ## [1.0.7] - 2026-11-15 21:06
 
 ### Fixed
