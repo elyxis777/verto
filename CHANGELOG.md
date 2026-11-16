@@ -2,6 +2,14 @@
 
 All notable changes to the Verto project will be documented in this file.
 
+## [1.0.12] - 2026-11-16 22:28
+
+### Added
+- Added `LICENSE` file adhering to GNU General Public License v3.0 (GPL-3.0) preventing closed-source commercial forks.
+
+### Security
+- Untracked `GEMINI.md` and added `.gemini/` and `GEMINI.md` to `.gitignore` to sanitize public repository of internal agent configurations.
+
 ## [1.0.11] - 2026-11-16 22:25
 
 ### Changed

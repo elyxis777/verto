@@ -47,6 +47,13 @@ Verto serves the frontend and compiled WASM binaries via Vercel Edge CDN with st
 
 ---
 
+## License & Usage
+
+Distributed under the **GNU General Public License v3.0 (GPL-3.0)**.  
+You are free to inspect, audit, and run the code. Proprietary closed-source forks and commercial redistribution without reciprocal open-sourcing are strictly prohibited under the terms of the GPL-3.0 license.
+
+---
+
 ## Support & Open Source
 
 Verto is built and maintained as an independent local-first utility.  
@@ -56,4 +63,4 @@ If it saved you time or a cloud subscription, consider supporting development:
 
 ---
 
-© 2026 ELYXIS. All rights reserved.
+© 2026 ELYXIS. All rights reserved. Licensed under GPL-3.0.
