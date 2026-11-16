@@ -390,15 +390,16 @@ export default function App() {
 
             {/* Sponsor / Coffee Footer Link */}
             <div className="pt-4 border-t border-c-steel/10 flex items-center justify-between">
-              <button 
-                type="button"
-                onClick={() => alert("Sponsorship conduit initializing soon. Thank you for supporting Verto's local-first architecture.")}
+              <a 
+                href="https://ko-fi.com/elyxis"
+                target="_blank"
+                rel="noreferrer noopener"
                 className="flex items-center gap-2 text-c-steel hover:text-amber-300 transition-colors group cursor-pointer"
-                title="Support independent open-source WASM development (Coming Soon)"
+                title="Support independent open-source WASM development on Ko-fi"
               >
                 <Coffee className="w-3.5 h-3.5 group-hover:scale-110 transition-transform text-amber-400" />
-                <span className="mono-ui text-[0.55rem] tracking-wider uppercase">Sponsor Engine</span>
-              </button>
+                <span className="mono-ui text-[0.55rem] tracking-wider uppercase">Support on Ko-fi</span>
+              </a>
               <span className="mono-ui text-[0.5rem] text-c-steel/40">100% Client-Side</span>
             </div>
           </div>
@@ -453,7 +454,47 @@ export default function App() {
               </div>
             )}
             {appState === 'processing' && <div className="flex-grow flex flex-col items-center justify-center"><div className="relative mb-12 md:mb-16 scale-75 md:scale-100"><svg width="280" height="280" className="rotate-[-90deg]"><circle cx="140" cy="140" r="134" className="fill-none stroke-c-steel/20 stroke-[2]" /><circle cx="140" cy="140" r="134" className="fill-none stroke-c-sky stroke-[4] transition-all duration-300" style={{ strokeDasharray: 842, strokeDashoffset: 842 - (progress / 100 * 842) }} /></svg><div className="absolute inset-0 flex flex-col items-center justify-center"><span className="text-6xl md:text-7xl font-black text-white tracking-tighter">{progress}%</span><span className="mono-ui text-c-steel tracking-[0.6em] mt-4">Active</span></div></div><p className="text-base md:text-lg font-mono text-c-sky uppercase tracking-[0.5em] animate-pulse">{statusText}</p></div>}
-            {appState === 'success' && <div className="flex-grow flex flex-col items-center justify-center text-center"><Zap className="w-16 md:w-24 h-16 md:h-24 text-c-sky mb-8" /><h2 className="text-3xl md:text-5xl font-black tracking-[0.3em] text-white uppercase mb-4">Artifact Stabilized</h2><div className="flex flex-col md:flex-row gap-4 w-full max-w-md mx-auto"><a href={downloadUrl} download={`${currentFile?.name.replace(/\.[^/.]+$/, "")}.${selectedFormat.ext}`} className="flex-grow flex items-center justify-center gap-4 py-5 md:py-6 bg-c-sky text-c-dark text-lg font-black uppercase tracking-widest hover:bg-white">Retrieve</a><button onClick={resetVerto} className="px-10 py-5 border border-c-steel/50 text-c-ice text-sm font-bold uppercase tracking-widest hover:bg-white/5">New</button></div></div>}
+            {appState === 'success' && (
+              <div className="flex-grow flex flex-col items-center justify-center text-center">
+                <Zap className="w-16 md:w-24 h-16 md:h-24 text-c-sky mb-6" />
+                <h2 className="text-3xl md:text-5xl font-black tracking-[0.3em] text-white uppercase mb-4">Artifact Stabilized</h2>
+                <div className="flex flex-col md:flex-row gap-4 w-full max-w-md mx-auto mb-6">
+                  <a 
+                    href={downloadUrl} 
+                    download={`${currentFile?.name.replace(/\.[^/.]+$/, "")}.${selectedFormat.ext}`} 
+                    className="flex-grow flex items-center justify-center gap-4 py-5 md:py-6 bg-c-sky text-c-dark text-lg font-black uppercase tracking-widest hover:bg-white"
+                  >
+                    Retrieve
+                  </a>
+                  <button 
+                    onClick={resetVerto} 
+                    className="px-10 py-5 border border-c-steel/50 text-c-ice text-sm font-bold uppercase tracking-widest hover:bg-white/5"
+                  >
+                    New
+                  </button>
+                </div>
+                
+                {/* Anti-cloud value prop tip hook */}
+                <div className="max-w-md mx-auto p-4 bg-white/[0.02] border border-c-steel/20 rounded-sm text-left">
+                  <div className="flex items-start gap-3">
+                    <Coffee className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                    <div className="space-y-1">
+                      <p className="text-[0.65rem] text-c-ice leading-relaxed">
+                        Converted 100% locally on your machine with zero server uploads, no data harvesting, and no subscription paywalls.
+                      </p>
+                      <a 
+                        href="https://ko-fi.com/elyxis" 
+                        target="_blank" 
+                        rel="noreferrer noopener"
+                        className="inline-flex items-center gap-1.5 mono-ui text-[0.6rem] text-amber-300 hover:text-amber-200 uppercase font-bold tracking-wider pt-1 hover:underline"
+                      >
+                        Buy the developer a coffee on Ko-fi →
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
             {appState === 'error' && <div className="flex-grow flex flex-col items-center justify-center text-center p-6 md:p-12"><AlertCircle className="w-16 md:w-24 h-16 md:h-24 text-red-400 mb-8" /><h2 className="text-2xl md:text-3xl font-black text-red-200 uppercase tracking-[0.4em] mb-6">Custos Alert</h2><p className="mono-ui text-red-400 mb-12">{error}</p><button onClick={resetVerto} className="px-12 py-4 md:px-16 md:py-5 border border-red-900/50 text-red-300 font-mono uppercase hover:bg-red-900/20">Reset Diagnostics</button></div>}
           </div>
         </div>

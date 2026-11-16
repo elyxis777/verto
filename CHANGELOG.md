@@ -2,6 +2,11 @@
 
 All notable changes to the Verto project will be documented in this file.
 
+## [1.0.9] - 2026-11-16 20:04
+
+### Added
+- Integrated live Ko-fi monetization conduits (`https://ko-fi.com/elyxis`) in both the sidebar footer and the post-transduction success screen (`Artifact Stabilized`).
+
 ## [1.0.8] - 2026-11-15 21:26
 
 ### Removed
