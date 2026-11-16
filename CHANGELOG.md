@@ -2,6 +2,20 @@
 
 All notable changes to the Verto project will be documented in this file.
 
+## [1.1.0] - 2026-11-17 01:45
+
+### Added
+- Implemented `SettingsDrawer` accordion component enabling format-specific tuning directly from the synthesis viewport.
+- Added quick optimization presets (`Fast Delivery`, `Web Optimized`, `Archival Master`, `Hi-Fi Master`, `Speech/Podcast`) for instant one-click calibration.
+- Parameterized video transduction: custom resolution scaling (1080p, 720p, 480p), CRF quality slider (18–35), encoder presets (`ultrafast`, `veryfast`, `medium`), ProRes profiles (Proxy, LT, Standard, HQ), and audio stripping (`-an`).
+- Parameterized audio transduction: custom bitrates (128k–320k), sample rate selection (44.1k–96k), channel downmixing (mono/stereo), and gain adjustments (-6dB to +6dB).
+- Parameterized image/GIF transduction: resolution downscaling, GIF frame rates (10–30 fps), and quality compression curves (10–100%).
+
+## [1.0.13] - 2026-11-17 01:37
+
+### Added
+- Formulated `PLAN.md` detailing the granular parameterization engine (CRF quality sliders, ProRes profiles, audio bitrates/channels, GIF resolution/framerates) in response to initial community feedback.
+
 ## [1.0.12] - 2026-11-16 22:28
 
 ### Added

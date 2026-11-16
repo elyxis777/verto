@@ -7,7 +7,8 @@ import {
 } from 'lucide-react';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile, toBlobURL } from '@ffmpeg/util';
-import { FORMAT_MATRIX } from './matrix';
+import { FORMAT_MATRIX, DEFAULT_SETTINGS } from './matrix';
+import SettingsDrawer from './SettingsDrawer';
 import { Analytics } from '@vercel/analytics/react';
 
 export default function App() {
@@ -27,6 +28,8 @@ export default function App() {
   const [showStatus, setShowStatus] = useState(false);
   const [systemSpecs, setSystemSpecs] = useState({ core: 'LOCAL_HARDWARE: VERIFIED', gpu: 'GENERIC RENDERING CORE' });
   const [searchQuery, setSearchQuery] = useState('');
+  const [showTuneDrawer, setShowTuneDrawer] = useState(false);
+  const [tuningSettings, setTuningSettings] = useState(DEFAULT_SETTINGS);
 
   const HELP_GUIDE = [
     { h: "01. INTAKE", p: "Initialize Machina by dropping any media artifact into the central buffer." },
@@ -192,7 +195,8 @@ export default function App() {
       const inputFileName = 'input_' + sourceFile.name;
       const outputFileName = `output.${selectedFormat.ext}`;
       await ffmpeg.writeFile(inputFileName, await fetchFile(sourceFile));
-      await ffmpeg.exec(selectedFormat.cmd(inputFileName));
+      const currentCategorySettings = tuningSettings[activeCategory] || {};
+      await ffmpeg.exec(selectedFormat.cmd(inputFileName, currentCategorySettings));
       const data = await ffmpeg.readFile(outputFileName);
       const blob = new Blob([data.buffer], { type: 'application/octet-stream' });
       setDownloadUrl(URL.createObjectURL(blob));
@@ -436,15 +440,27 @@ export default function App() {
                   <p className="mono-ui text-c-steel italic">Drop local artifact or click to select</p>
                 </div>
                 {currentFile && (
-                  <div className="mt-8 p-6 md:p-8 bg-c-sky/5 border border-c-sky/20 flex flex-col lg:flex-row items-center justify-between rounded-sm gap-6">
-                    <div className="flex items-center gap-6 md:gap-8">
-                      <div className="p-4 md:p-5 bg-c-sky/10 text-c-sky">{activeCategory === 'video' ? <FileVideo className="w-8 md:w-10 h-8 md:h-10" /> : activeCategory === 'audio' ? <FileAudio className="w-8 md:w-10 h-8 md:h-10" /> : <ImageIcon className="w-8 md:w-10 h-8 md:h-10" />}</div>
-                      <div>
-                        <p className="text-lg md:text-xl font-black text-white uppercase truncate max-w-[250px] md:max-w-[400px]">{currentFile.name}</p>
-                        <div className="flex flex-wrap gap-4 mt-2"><span className="mono-ui text-c-steel">Size: {(currentFile.size / 1024 / 1024).toFixed(2)} MB</span><span className="mono-ui text-c-sky font-bold">Target: {selectedFormat.label}</span></div>
+                  <div className="mt-8 flex flex-col gap-3">
+                    <div className="p-6 md:p-8 bg-c-sky/5 border border-c-sky/20 flex flex-col lg:flex-row items-center justify-between rounded-sm gap-6">
+                      <div className="flex items-center gap-6 md:gap-8">
+                        <div className="p-4 md:p-5 bg-c-sky/10 text-c-sky">{activeCategory === 'video' ? <FileVideo className="w-8 md:w-10 h-8 md:h-10" /> : activeCategory === 'audio' ? <FileAudio className="w-8 md:w-10 h-8 md:h-10" /> : <ImageIcon className="w-8 md:w-10 h-8 md:h-10" />}</div>
+                        <div>
+                          <p className="text-lg md:text-xl font-black text-white uppercase truncate max-w-[250px] md:max-w-[400px]">{currentFile.name}</p>
+                          <div className="flex flex-wrap gap-4 mt-2"><span className="mono-ui text-c-steel">Size: {(currentFile.size / 1024 / 1024).toFixed(2)} MB</span><span className="mono-ui text-c-sky font-bold">Target: {selectedFormat.label}</span></div>
+                        </div>
                       </div>
+                      <button onClick={executeVerto} disabled={!isLoaded} className="w-full lg:w-auto px-12 py-5 md:px-16 md:py-6 bg-c-sky text-c-dark text-lg font-black uppercase tracking-[0.2em] hover:bg-white disabled:opacity-50 transition-colors">Execute Synthesis</button>
                     </div>
-                    <button onClick={executeVerto} disabled={!isLoaded} className="w-full lg:w-auto px-12 py-5 md:px-16 md:py-6 bg-c-sky text-c-dark text-lg font-black uppercase tracking-[0.2em] hover:bg-white disabled:opacity-50">Execute Synthesis</button>
+
+                    <SettingsDrawer
+                      isOpen={showTuneDrawer}
+                      onToggle={() => setShowTuneDrawer(!showTuneDrawer)}
+                      category={activeCategory}
+                      format={selectedFormat}
+                      settings={tuningSettings[activeCategory] || {}}
+                      onChange={(newSettings) => setTuningSettings(prev => ({ ...prev, [activeCategory]: newSettings }))}
+                      onReset={() => setTuningSettings(prev => ({ ...prev, [activeCategory]: { ...DEFAULT_SETTINGS[activeCategory] } }))}
+                    />
                   </div>
                 )}
               </div>
