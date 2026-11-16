@@ -253,7 +253,17 @@ export default function App() {
             </div>
           </div>
 
-          <div className="flex items-center gap-5 border-l border-c-steel/10 pl-6 h-8">
+          <div className="flex items-center gap-4 border-l border-c-steel/10 pl-6 h-8">
+            <a 
+              href="https://ko-fi.com/elyxis"
+              target="_blank"
+              rel="noreferrer noopener"
+              className="flex items-center gap-2 px-3 py-1.5 bg-amber-400/10 hover:bg-amber-400/20 border border-amber-400/30 hover:border-amber-400 text-amber-300 rounded transition-all group cursor-pointer"
+              title="Support independent open-source WASM development on Ko-fi"
+            >
+              <Coffee className="w-3.5 h-3.5 text-amber-400 group-hover:scale-110 transition-transform" />
+              <span className="mono-ui font-bold text-[0.6rem] tracking-wider uppercase text-amber-300">Support on Ko-fi</span>
+            </a>
             <button 
               onClick={() => setShowHelp(true)}
               className="text-c-steel hover:text-c-sky transition-colors cursor-help"
@@ -386,21 +396,6 @@ export default function App() {
                   </button>
                 ))}
               </div>
-            </div>
-
-            {/* Sponsor / Coffee Footer Link */}
-            <div className="pt-4 border-t border-c-steel/10 flex items-center justify-between">
-              <a 
-                href="https://ko-fi.com/elyxis"
-                target="_blank"
-                rel="noreferrer noopener"
-                className="flex items-center gap-2 text-c-steel hover:text-amber-300 transition-colors group cursor-pointer"
-                title="Support independent open-source WASM development on Ko-fi"
-              >
-                <Coffee className="w-3.5 h-3.5 group-hover:scale-110 transition-transform text-amber-400" />
-                <span className="mono-ui text-[0.55rem] tracking-wider uppercase">Support on Ko-fi</span>
-              </a>
-              <span className="mono-ui text-[0.5rem] text-c-steel/40">100% Client-Side</span>
             </div>
           </div>
 

@@ -2,6 +2,12 @@
 
 All notable changes to the Verto project will be documented in this file.
 
+## [1.0.10] - 2026-11-16 21:22
+
+### Changed
+- Elevated Ko-fi support link into the top persistent HUD header with a high-contrast amber pill badge.
+- Removed crowded and clipped footer text from the format sidebar.
+
 ## [1.0.9] - 2026-11-16 20:04
 
 ### Added
