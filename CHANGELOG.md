@@ -2,6 +2,12 @@
 
 All notable changes to the Verto project will be documented in this file.
 
+## [1.0.11] - 2026-11-16 22:25
+
+### Changed
+- Replaced technical internal architecture README with an accessible, consumer-friendly landing homepage for GitHub visitors.
+- Fixed Mermaid flowchart syntax error that was breaking GitHub markdown rendering.
+
 ## [1.0.10] - 2026-11-16 21:22
 
 ### Changed
