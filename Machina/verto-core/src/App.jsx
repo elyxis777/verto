@@ -8,6 +8,7 @@ import {
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile, toBlobURL } from '@ffmpeg/util';
 import { FORMAT_MATRIX } from './matrix';
+import { Analytics } from '@vercel/analytics/react';
 
 export default function App() {
   const [ffmpeg] = useState(new FFmpeg());
@@ -517,6 +518,7 @@ export default function App() {
           </div>
         )}
       </div>
+      <Analytics />
     </div>
   );
 }
