@@ -1,95 +1,89 @@
-# VERTO // EVOLUTION BLUEPRINT (PLAN.md)
-**Document Status:** Approved Roadmap  
-**Source of Requirements:** Real-world community feedback (`r/SideProject` user testing)  
-**Core Pillars:** Batch Processing & Queueing, Granular Format Controls, and High-Clarity Processing Telemetry.
+# VERTO // REVISED SPECIFICATION & ROADMAP (PLAN.md)
+**Status:** Approved Architectural Blueprint  
+**Origin:** Live Reddit Community User Testing (`r/SideProject`, `r/WebApps`, `r/IMadeThis`)  
+**Core Directives:**
+1. Clean Conversion Abortion / In-Flight Cancellation (without reloading the page).
+2. Browser 2GB WASM Memory Safety Guardrails & Large-File Warnings.
+3. Enhanced Multi-File Batch Queue Pipeline.
+4. Granular Format Controls (ProRes Profiles, CRF Sliders, Audio Bitrates).
+5. Live Processing Telemetry (Speed/FPS/Time Elapsed).
 
 ---
 
-## 1. Executive Summary & Community Signals
+## 1. Direct Analysis of Community Inputs
 
-Feedback from early users highlighted three critical UX and feature demands:
-1. **Batch Ingestion & Queue Pipeline:** Allow dropping multiple files or folders at once with sequential processing and a single "Download All (ZIP)" or individual download queue.
-2. **Granular Format Tuning (Drawer):** Allow power users to tweak ProRes profiles (Proxy to 4444), MP4 CRF/presets, audio bitrates, and resolution scaling without cluttering the one-click experience.
-3. **High-Clarity Progress HUD:** Ensure users on low-spec devices never think the browser tab froze by surfacing elapsed time, estimated remaining time, active pass/frame counters, and engine log pulses.
+### User A: `u/umit_dogan` (`r/SideProject`)
+> *"Can I cancel a large conversion without reloading the tab? Keeping the selected file and conversion settings after cancellation would make it easier to retry at a lower resolution."*
+* **Architecture Solution:** Add an active `Abort / Cancel Transcode` mechanism (`ffmpeg.terminate()` or abort signal) that safely resets the state machine back to `idle`, cleans up memory, but preserves `currentFile` and `selectedFormat` so the user can quickly tweak settings and restart.
 
----
+### User B: `u/coconut_paddy_Kerala` (`r/WebApps`)
+> *"I remember it can't convert video files. Is it true now?"*
+* **Architecture Solution:** Affirm full multi-codec video capability (MP4 H.264/H.265, MKV, WebM VP9, MOV ProRes, AVI, GIF) powered by modern `@ffmpeg/core`.
 
-## 2. Technical Architecture & Feature Specifications
-
-### 2.1 Pillar A: Multi-File Batch Queue Pipeline
-*Current State:* Single-file state (`currentFile`), immediately blocking the input zone.  
-*Target State:* File array state (`fileQueue: Array<{ id, file, status, progress, outputBlob, error }>`).
-
-* **Queue Lifecycle:**
-  1. **Intake:** User drops 1 to 50 files (or a folder).
-  2. **Staging Table:** List displaying filename, size, chosen target format, status (`queued`, `transcoding`, `complete`, `failed`), and progress bar.
-  3. **Sequential WASM Execution:** To prevent browser memory exhaustion (OOM), files transcode **one by one** in a FIFO queue.
-  4. **Memory Hygiene:** After each file finishes, its input and output files are detached from FFmpeg's virtual filesystem (`FS.unlink`), and the output is converted to an object URL.
-  5. **Export:** Individual download buttons + "Download All as ZIP" (via lightweight JSZip or sequential download triggers).
-
-### 2.2 Pillar B: Parameterized Format Controls (Settings Drawer)
-*Current State:* Hardcoded arrays in `matrix.js`.  
-*Target State:* Default fallback + dynamic flag builder.
-
-* **Video Controls:**
-  - **Resolution Scale:** `Original (Source)` | `1080p` | `720p` | `480p` (`-vf scale=-2:720`)
-  - **Speed / Efficiency Preset:** `ultrafast` (default) | `veryfast` | `medium`
-  - **Quality (CRF):** Slider from 18 (near lossless) to 35 (compressed). Default: 23.
-  - **ProRes Profiles (MOV):** Proxy (0), LT (1), Standard 422 (2, default), HQ (3).
-  - **Audio Strip:** Checkbox to remove audio track (`-an`).
-* **Audio Controls:**
-  - **Bitrate:** `128k`, `192k`, `256k`, `320k`.
-  - **Channels:** Stereo (default) | Mono downmix (`-ac 1`).
-  - **Sample Rate:** `44.1 kHz`, `48.0 kHz`.
-* **Image / GIF Controls:**
-  - **GIF Framerate:** 10 fps, 15 fps (default), 24 fps, 30 fps.
-  - **GIF Width:** 320px, 480px (default), 640px, Source.
-
-### 2.3 Pillar C: Telemetry & Progress Indicator Polish
-*Current State:* Single percentage circular SVG. Long video transcodes can make users think the tab is stuck.  
-*Target State:* Real-time active telemetry pulse.
-
-* **Active Frame / Speed HUD:** Surface FFmpeg stdout stats directly in the HUD:
-  - `time=00:01:23.45` (Current position)
-  - `speed=3.2x` (Transcoding rate relative to real time)
-  - `fps=45` (Current rendering throughput)
-* **ETA Calculation:** Dynamically project remaining time based on input duration vs current elapsed position.
-* **Freeze-Guard Animation:** Sub-second pulsating heartbeat indicator ensuring the user visually confirms the Web Worker is alive and crunching.
+### User C: `u/Total-Reasonable` (`r/IMadeThis`)
+> *"No file size limits is only true up to the browser's memory ceiling... If you're using ffmpeg.wasm, the single-threaded build and 2GB wasm memory cap will crash on big videos... Have you tested a 3-4GB file on a phone yet? I'd surface a clear warning or a chunked fallback rather than letting it fail silently."*
+* **Architecture Solution:** This user has deep technical knowledge of WebAssembly constraints. 32-bit WASM pointers enforce a hard **2GB addressable memory limit per instance**.
+  - Surface a proactive RAM & file-size preflight warning if `file.size > 1.5GB` (desktop) or `> 500MB` (mobile).
+  - Explicitly document that `COOP`/`COEP` headers are already enabled for `SharedArrayBuffer` multithreading.
+  - Gracefully catch WASM OOM (Out Of Memory) errors and display a clear guidance banner rather than letting the tab silently lock up.
 
 ---
 
-## 3. Implementation Phasing
+## 2. Core Pillars & Feature Breakdown
+
+### Pillar 1: In-Flight Cancellation & State Preservation
+* **Mechanism:**
+  - Introduce an `Abort Synthesis` button during the `processing` state.
+  - On trigger: invoke `ffmpeg.terminate()`, re-initialize `loadFundamentum()`, but **preserve** `currentFile` and UI format selection.
+  - Returns state directly to `idle` with an alert: `Transduction Aborted. Ready to re-configure.`
+
+### Pillar 2: Browser WASM Memory Preflight & Safety Guard
+* **Memory Preflight Check:**
+  - Before writing files into WASM memory via `ffmpeg.writeFile`, calculate available memory ceiling (`navigator.deviceMemory`).
+  - If file size exceeds 1.5GB: Display an informational warning:
+    > *"Notice: Files exceeding 1.5GB push browser WebAssembly memory limits (2GB 32-bit ceiling). If your browser halts, retry at a lower resolution or bitrate."*
+* **OOM Error Trap:** Catch `RuntimeError: memory access out of bounds` or worker termination and present an actionable fix (e.g. "Select a lower resolution or ultrafast preset").
+
+### Pillar 3: Multi-File Batch Queue Pipeline
+* **Iterable Queue:** State management to intake multiple files via drag-and-drop.
+* **Sequential FIFO Execution:** Convert files one by one to prevent multiple parallel WASM allocations from triggering instant browser tab crashes.
+* **Memory Reclamation:** Explicit virtual file deletion (`ffmpeg.deleteFile`) immediately upon completion of each queue item.
+* **Batch Downloader:** Individual download triggers per item + "Download All" option.
+
+### Pillar 4: Granular Format Configuration Drawer
+* **Collapsible "Tune Parameters" HUD:**
+  - **Video:** Resolution scaling (1080p, 720p, 480p), Quality CRF (18–35), Speed Presets (`ultrafast`, `medium`), ProRes Profiles (Proxy `0`, LT `1`, Standard `2`, HQ `3`), and Audio Strip (`-an`).
+  - **Audio:** Bitrates (128k–320k), Stereo vs Mono (`-ac 1`), and Sample Rates (44.1k/48k).
+  - **GIF:** Framerate (10–30fps) and width scaling.
+
+### Pillar 5: Real-Time Telemetry & Progress HUD
+* **Live Engine Pulse:** Parse `ffmpeg.on('log')` to extract `time=`, `speed=`, and `fps=`.
+* Surface active throughput beneath the circular progress wheel to eliminate user anxiety over frozen tabs.
+
+---
+
+## 3. Phased Implementation Strategy
 
 ```mermaid
 flowchart TD
-    P1[Phase 1: Progress & Telemetry Polish] --> P2[Phase 2: Granular Format Settings Drawer]
-    P2 --> P3[Phase 3: Multi-File Batch Queue Pipeline]
-    P3 --> P4[Phase 4: ZIP Packing & Batch Download]
+    P1[Phase 1: In-Flight Cancel & Memory Preflight] --> P2[Phase 2: Live Progress Telemetry HUD]
+    P2 --> P3[Phase 3: Granular Format Settings Drawer]
+    P3 --> P4[Phase 4: Multi-File Batch Queue Pipeline]
 ```
 
-### Phase 1: High-Clarity Progress HUD (Immediate Win)
-- Extract `time`, `fps`, and `speed` metrics from `ffmpeg.on('log')`.
-- Display live throughput and elapsed time beneath the circular progress wheel.
-- Add an animated pulse line so users on slow machines know the thread is healthy.
+### Phase 1: In-Flight Cancel & Memory Preflight (Immediate Priority)
+- Add `Abort / Cancel` button in `appState === 'processing'`.
+- Implement non-destructive reset keeping `currentFile` and selected options in memory.
+- Add file size preflight guard warning for files `> 1.5GB`.
 
-### Phase 2: Format Tuning Drawer (Community Request)
-- Refactor `matrix.js` into modular argument generator functions.
-- Create collapsible `<TuneParameters />` drawer in `App.jsx`.
-- Implement format-specific sliders and dropdowns with instant fallback defaults.
+### Phase 2: Live Progress Telemetry HUD
+- Parse stream log values for `speed` and `time`.
+- Display live stats below the progress circle.
 
-### Phase 3: Multi-File Batch Queue Engine
-- Migrate `App.jsx` state from single `currentFile` to an iterable `queue`.
-- Build the batch queue HUD table showing files, per-file status, and format selection.
-- Implement sequential asynchronous execution loop with proper WASM RAM cleanup.
+### Phase 3: Format Parameter Tuning Drawer
+- Refactor `matrix.js` command closures to accept dynamic option parameters.
+- Add collapsible settings drawer for ProRes profiles, CRF, and bitrates.
 
-### Phase 4: Batch Export & ZIP Integration
-- Add "Download All" bundle mechanism.
-- Verify memory stability across 1GB+ multi-file test suites.
-
----
-
-## 4. Verification & Guardrails
-
-* **WASM Memory Ceiling:** Monitor that multiple consecutive jobs do not leak memory into the browser tab (explicit `FS.unlink` and garbage collection).
-* **Cross-Origin Isolation:** Ensure no external libraries violate `COOP`/`COEP` security headers.
-* **Zero-Upload Guarantee:** All operations strictly preserve local execution with zero network egress.
+### Phase 4: Multi-File Batch Processing
+- Migrate from single file state to queue array.
+- Sequential asynchronous worker loop with per-item cleanup.
