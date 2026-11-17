@@ -11,6 +11,11 @@ All notable changes to the Verto project will be documented in this file.
 - Parameterized audio transduction: custom bitrates (128k–320k), sample rate selection (44.1k–96k), channel downmixing (mono/stereo), and gain adjustments (-6dB to +6dB).
 - Parameterized image/GIF transduction: resolution downscaling, GIF frame rates (10–30 fps), and quality compression curves (10–100%).
 
+## [1.0.14] - 2026-11-17 17:21
+
+### Changed
+- Rewrote `PLAN.md` from scratch consolidating all real-world Reddit community requirements: Multi-file Batch Queueing, Granular Format Controls (ProRes/CRF/Bitrate), and High-Clarity Processing Telemetry (FPS, ETA, Speed pulse).
+
 ## [1.0.13] - 2026-11-17 01:37
 
 ### Added
