@@ -5,7 +5,7 @@
 
 ---
 
-### [🚀 Open Live Web App](https://verto-eta.vercel.app) • [🌐 Elyxis Portal](https://elyxis.pages.dev/)
+### [🚀 Open Live Web App](https://verto.elyxis.vercel.app/) • [🌐 Elyxis Portal](https://elyxis.pages.dev/)
 
 ---
 

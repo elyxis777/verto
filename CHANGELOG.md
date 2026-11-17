@@ -2,6 +2,12 @@
 
 All notable changes to the Verto project will be documented in this file.
 
+## [1.2.2] - 2026-11-17 18:32
+
+### Added
+- Integrated official GitHub repository link (`https://github.com/elyxis777/verto/`) into the persistent top HUD navigation bar and the post-transduction success footer.
+- Updated canonical live web app URL in README to `https://verto.elyxis.vercel.app/`.
+
 ## [1.2.1] - 2026-11-17 17:50
 
 ### Added

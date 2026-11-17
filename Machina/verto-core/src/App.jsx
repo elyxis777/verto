@@ -4,7 +4,7 @@ import {
   FileAudio, FileVideo, Zap, Image as ImageIcon, 
   Search, Check, X, Activity, HardDrive, Maximize2, Info, Power,
   ShieldCheck, Coffee, Infinity as InfinityIcon,
-  Archive, Trash2, Plus, Clock, Gauge, Play, Globe
+  Archive, Trash2, Plus, Clock, Gauge, Play, Globe, Github
 } from 'lucide-react';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile, toBlobURL } from '@ffmpeg/util';
@@ -438,6 +438,18 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-4 border-l border-c-steel/10 pl-6 h-8">
+            {/* GitHub Repository */}
+            <a 
+              href="https://github.com/elyxis777/verto/" 
+              target="_blank" 
+              rel="noreferrer noopener"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-white/5 border border-white/20 hover:border-white hover:bg-white/10 text-white rounded-sm transition-all text-[0.55rem] mono-ui font-bold"
+              title="View source code on GitHub"
+            >
+              <Github className="w-3 h-3 text-white" />
+              <span>GITHUB</span>
+            </a>
+
             {/* Elyxis Main Portal */}
             <a 
               href="https://elyxis.pages.dev/" 
@@ -958,6 +970,15 @@ export default function App() {
                         >
                           <Globe className="w-2.5 h-2.5" />
                           Elyxis Central Hub →
+                        </a>
+                        <a 
+                          href="https://github.com/elyxis777/verto/" 
+                          target="_blank" 
+                          rel="noreferrer noopener"
+                          className="inline-flex items-center gap-1.5 mono-ui text-[0.6rem] text-c-ice hover:text-white uppercase font-bold tracking-wider hover:underline"
+                        >
+                          <Github className="w-2.5 h-2.5" />
+                          GitHub Repository →
                         </a>
                       </div>
                     </div>
