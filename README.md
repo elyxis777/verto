@@ -11,6 +11,8 @@
 
 ## Why Verto?
 
+> ⚡ **Local Hardware Performance:** Because Verto runs 100% client-side via in-browser WebAssembly without offloading files to remote server farms, transcode speeds depend directly on your device's CPU and RAM.
+
 Most online file converters force you to upload large 500MB videos to third-party servers, queue you behind paid subscription paywalls, or bombard you with sketchy download buttons.
 
 **Verto works completely differently:**

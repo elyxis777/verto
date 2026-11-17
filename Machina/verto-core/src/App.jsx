@@ -4,7 +4,7 @@ import {
   FileAudio, FileVideo, Zap, Image as ImageIcon, 
   Search, Check, X, Activity, HardDrive, Maximize2, Info, Power,
   ShieldCheck, Coffee, Infinity as InfinityIcon,
-  Archive, Trash2, Plus, Clock, Gauge, Play, Globe, Github
+  Archive, Trash2, Plus, Clock, Gauge, Play, Globe, Github, Cpu
 } from 'lucide-react';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile, toBlobURL } from '@ffmpeg/util';
@@ -49,7 +49,8 @@ export default function App() {
     { h: "01. BATCH INTAKE", p: "Drop multiple files or entire albums into the central buffer to stage a batch queue." },
     { h: "02. FORMAT TUNING", p: "Select your target format from the sidebar or open 'Tune Parameters' to adjust CRF, bitrates, and scaling." },
     { h: "03. SYNTHESIS", p: "Execute Synthesis to sequentially transcode items one-by-one with automated WASM RAM garbage collection." },
-    { h: "04. EXPORT & ZIP", p: "Download artifacts individually or bundle all stabilized files in a single uncompressed ZIP." }
+    { h: "04. EXPORT & ZIP", p: "Download artifacts individually or bundle all stabilized files in a single uncompressed ZIP." },
+    { h: "05. HARDWARE PERFORMANCE", p: "Verto runs WebAssembly compiled FFmpeg directly on your local CPU without remote servers. Processing throughput and encoding duration depend entirely on your device's computing capabilities." }
   ];
   
   const fileInputRef = useRef(null);
@@ -665,6 +666,15 @@ export default function App() {
                   </div>
                 </div>
 
+                {/* Local Compute Disclaimer Banner */}
+                <div className="flex items-center gap-2.5 px-3.5 py-2.5 bg-white/[0.015] border border-c-sky/20 rounded-sm mb-6 shrink-0">
+                  <Cpu className="w-4 h-4 text-c-sky shrink-0" />
+                  <p className="text-[0.62rem] text-c-ice/75 leading-relaxed">
+                    <span className="mono-ui text-c-sky font-bold mr-1.5">CLIENT-SIDE PROCESSING:</span>
+                    Transcoding speed is determined by your local device's CPU and RAM. Processing executes 100% locally in your browser with zero remote servers.
+                  </p>
+                </div>
+
                 <input 
                   type="file" 
                   ref={fileInputRef} 
@@ -833,7 +843,7 @@ export default function App() {
                   <div className="flex items-center justify-between text-[0.55rem] mono-ui mb-1.5 px-1">
                     <span className="flex items-center gap-1.5 text-c-sky">
                       <span className="w-2 h-2 rounded-full bg-c-sky animate-ping"></span>
-                      WASM STREAM // WORKER ALIVE
+                      LOCAL WASM EXECUTION // THROUGHPUT LIMITED BY HOST CPU
                     </span>
                     <span className="text-c-steel">
                       CLOCK: {formatSeconds(elapsedSeconds)}
@@ -951,7 +961,7 @@ export default function App() {
                     <Coffee className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
                     <div className="space-y-1">
                       <p className="text-[0.65rem] text-c-ice leading-relaxed">
-                        Transcoded 100% locally on your machine with zero server uploads, no data harvesting, and no subscription paywalls.
+                        Transcoded 100% locally on your machine with zero server uploads, no data harvesting, and no subscription paywalls. Synthesis throughput scales directly with host hardware compute power.
                       </p>
                       <div className="flex flex-wrap items-center gap-4 pt-1">
                         <a 

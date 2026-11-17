@@ -2,6 +2,15 @@
 
 All notable changes to the Verto project will be documented in this file.
 
+## [1.2.3] - 2026-11-17 18:42
+
+### Added
+- Local Hardware Compute Performance Disclaimers: Added persistent notices informing users that transduction throughput relies directly on their device's local CPU/RAM capabilities.
+- UI Intake Notice: Integrated `CLIENT-SIDE PROCESSING` hardware indicator banner above the central intake buffer in `App.jsx`.
+- Help & Operational Manual: Added section `05. HARDWARE PERFORMANCE` detailing local WebAssembly hardware execution in the interactive guide modal.
+- Active Telemetry Heartbeat: Updated heartbeat status pulse to explicitly display `LOCAL WASM EXECUTION // THROUGHPUT LIMITED BY HOST CPU`.
+- Completion Callout & Documentation: Added hardware scaling notes in the post-transduction success card and root `README.md`.
+
 ## [1.2.2] - 2026-11-17 18:32
 
 ### Added
