@@ -40,6 +40,11 @@ All notable changes to the Verto project will be documented in this file.
 - Parameterized audio transduction: custom bitrates (128k–320k), sample rate selection (44.1k–96k), channel downmixing (mono/stereo), and gain adjustments (-6dB to +6dB).
 - Parameterized image/GIF transduction: resolution downscaling, GIF frame rates (10–30 fps), and quality compression curves (10–100%).
 
+## [1.0.16] - 2026-11-17 20:53
+
+### Added
+- Integrated Smart Stream Copy (`-c copy`) remuxing and preflight duration heuristic checks into `PLAN.md` based on `u/Total-Reasonable` follow-up feedback.
+
 ## [1.0.15] - 2026-11-17 20:10
 
 ### Changed
