@@ -2,6 +2,17 @@
 
 All notable changes to the Verto project will be documented in this file.
 
+## [1.3.0] - 2026-11-17 21:15
+
+### Added
+- In-Flight Conversion Abortion: Implemented non-destructive `Abort Synthesis` action during active processing. Safely invokes `ffmpeg.terminate()` while preserving staged file queue, target formats, and custom tuning options.
+- Smart Stream Copy (Lossless Remuxing): Added `-c copy` acceleration when switching compatible container formats (MKV ⇄ MP4, MOV ⇄ MP4). Replaces 3-minute CPU re-encodes with near-instant ~1-2s remuxing, with seamless automatic fallback to full transcode upon codec incompatibility.
+- Media Metadata Duration Probe & Heuristic Estimation: Integrated non-decoding HTML5 `<video>` / `<audio>` metadata pre-load to probe track duration and display live time estimates (`Est. Transcode: ~2m (CPU-bound) | Device RAM: Healthy`).
+- WASM Memory Preflight & Safety Guardrails: Added proactive 32-bit WebAssembly address space warnings for files exceeding 1.5GB (or 500MB on mobile / low RAM devices).
+- Out-Of-Memory Recovery Trap: Structured error interceptor catching `memory access out of bounds` or allocation breaches with direct `Tune Parameters & Retry` workflow.
+- Format Tuning Preset Expansion: Added `Lossless Remux` preset and dedicated `Stream Copy` toggle switch inside `SettingsDrawer`.
+- Updated Documentation: Refined root `README.md` and `PLAN.md` to reflect full implementation of Reddit community testing directives.
+
 ## [1.2.3] - 2026-11-17 18:42
 
 ### Added

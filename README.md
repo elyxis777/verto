@@ -17,7 +17,9 @@ Most online file converters force you to upload large 500MB videos to third-part
 
 **Verto works completely differently:**
 * **Zero Server Uploads:** Your files **never leave your device**. The engine runs inside your browser tab.
-* **No File Size Caps:** Transcoding runs in your device's RAM using WebAssembly threads.
+* **Smart Stream Copy (~100x Faster):** When switching containers between compatible codecs (e.g. MKV ⇄ MP4), Verto remuxes instantly using `-c copy` without re-encoding video frames.
+* **Client-Side RAM Processing:** Transcoding runs in your device's browser memory via WebAssembly (subject to the browser's 2.0GB 32-bit WASM memory ceiling for single-instance allocations).
+* **In-Flight Cancellation:** Cancel running conversions with one click without reloading the tab, preserving your staged queue and format settings.
 * **100% Private:** Perfect for confidential work footage, private audio, and personal files.
 * **Completely Free:** No paywalls, no account creation, no ads.
 

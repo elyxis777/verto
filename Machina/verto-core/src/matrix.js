@@ -7,6 +7,7 @@ export const DEFAULT_SETTINGS = {
     crf: 23,                 // 18 - 35
     proresProfile: '2',      // '0' (Proxy) | '1' (LT) | '2' (Standard) | '3' (HQ)
     mute: false,
+    streamCopy: false,       // Smart Stream Copy: '-c copy'
   },
   audio: {
     bitrate: '320k',         // '128k' | '192k' | '256k' | '320k'
@@ -24,22 +25,28 @@ export const DEFAULT_SETTINGS = {
 export const PRESET_PROFILES = {
   video: [
     {
+      id: 'remux',
+      label: 'Lossless Remux',
+      desc: 'Instant container swap, zero re-encode (~100x faster)',
+      values: { scale: 'original', preset: 'ultrafast', crf: 23, mute: false, proresProfile: '2', streamCopy: true }
+    },
+    {
       id: 'fast',
       label: 'Fast Delivery',
       desc: 'Low CRF 28, ultrafast speed, lightweight',
-      values: { scale: '720p', preset: 'ultrafast', crf: 28, mute: false, proresProfile: '0' }
+      values: { scale: '720p', preset: 'ultrafast', crf: 28, mute: false, proresProfile: '0', streamCopy: false }
     },
     {
       id: 'web',
       label: 'Web Optimized',
       desc: 'Balanced 1080p, standard web fidelity',
-      values: { scale: '1080p', preset: 'veryfast', crf: 23, mute: false, proresProfile: '2' }
+      values: { scale: '1080p', preset: 'veryfast', crf: 23, mute: false, proresProfile: '2', streamCopy: false }
     },
     {
       id: 'archival',
       label: 'Archival Master',
       desc: 'Near-lossless CRF 18, pristine preservation',
-      values: { scale: 'original', preset: 'medium', crf: 18, mute: false, proresProfile: '3' }
+      values: { scale: 'original', preset: 'medium', crf: 18, mute: false, proresProfile: '3', streamCopy: false }
     }
   ],
   audio: [
@@ -87,6 +94,17 @@ export const PRESET_PROFILES = {
 // Video Argument Builder
 function buildVideoArgs(input, ext, formatId, userOpts = {}) {
   const opts = { ...DEFAULT_SETTINGS.video, ...userOpts };
+
+  // Smart Stream Copy (Lossless Container Remux)
+  if (opts.streamCopy && (formatId === 'mp4-h264' || formatId === 'mp4-h265' || formatId === 'mkv-matroska' || formatId === 'mov-prores' || formatId === 'avi-legacy')) {
+    const remuxArgs = ['-i', input, '-c', 'copy'];
+    if (ext === 'mp4' || ext === 'mov') {
+      remuxArgs.push('-movflags', '+faststart');
+    }
+    remuxArgs.push(`output.${ext}`);
+    return remuxArgs;
+  }
+
   const args = ['-i', input];
   const videoFilters = [];
 

@@ -4,7 +4,8 @@ import {
   FileAudio, FileVideo, Zap, Image as ImageIcon, 
   Search, Check, X, Activity, HardDrive, Maximize2, Info, Power,
   ShieldCheck, Coffee, Infinity as InfinityIcon,
-  Archive, Trash2, Plus, Clock, Gauge, Play, Globe, Github, Cpu
+  Archive, Trash2, Plus, Clock, Gauge, Play, Globe, Github, Cpu,
+  AlertTriangle, Square, SlidersHorizontal
 } from 'lucide-react';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile, toBlobURL } from '@ffmpeg/util';
@@ -34,6 +35,8 @@ export default function App() {
   });
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const elapsedTimerRef = useRef(null);
+  const abortRequestedRef = useRef(false);
+  const [abortNotice, setAbortNotice] = useState(null);
 
   const [activeCategory, setActiveCategory] = useState('video');
   const [selectedFormat, setSelectedFormat] = useState(FORMAT_MATRIX.video[0]);
@@ -45,12 +48,87 @@ export default function App() {
   const [showTuneDrawer, setShowTuneDrawer] = useState(false);
   const [tuningSettings, setTuningSettings] = useState(DEFAULT_SETTINGS);
 
+  const isMobileDevice = useMemo(() => {
+    if (typeof navigator === 'undefined') return false;
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+      (typeof window !== 'undefined' && navigator.maxTouchPoints > 1 && window.innerWidth < 768);
+  }, []);
+
+  const ramHealthStatus = useMemo(() => {
+    if (typeof navigator === 'undefined' || !navigator.deviceMemory) return 'Healthy';
+    if (navigator.deviceMemory >= 8) return 'Healthy (~' + navigator.deviceMemory + 'GB)';
+    if (navigator.deviceMemory >= 4) return 'Moderate (~' + navigator.deviceMemory + 'GB)';
+    return 'Constrained (~' + navigator.deviceMemory + 'GB)';
+  }, []);
+
+  const largeFileWarningItems = useMemo(() => {
+    const isLowRam = typeof navigator !== 'undefined' && navigator.deviceMemory && navigator.deviceMemory < 4;
+    const threshold = (isMobileDevice || isLowRam) ? 500 * 1024 * 1024 : 1.5 * 1024 * 1024 * 1024;
+    return fileQueue.filter(item => item.size > threshold);
+  }, [fileQueue, isMobileDevice]);
+
+  const probeMediaMetadata = (file, cat) => {
+    return new Promise((resolve) => {
+      if (cat !== 'video' && cat !== 'audio') {
+        resolve({ duration: 0 });
+        return;
+      }
+      try {
+        const el = document.createElement(cat === 'video' ? 'video' : 'audio');
+        el.preload = 'metadata';
+        const url = URL.createObjectURL(file);
+        el.src = url;
+        let finished = false;
+        const cleanup = (dur) => {
+          if (finished) return;
+          finished = true;
+          try { URL.revokeObjectURL(url); } catch (_) {}
+          resolve({ duration: dur || 0 });
+        };
+        el.onloadedmetadata = () => cleanup(el.duration);
+        el.onerror = () => cleanup(0);
+        setTimeout(() => cleanup(0), 1800);
+      } catch (_) {
+        resolve({ duration: 0 });
+      }
+    });
+  };
+
+  const getTranscodeEstimate = (item) => {
+    if (item.category === 'image') return '~1s';
+    
+    const ext = item.targetFormat?.ext?.toLowerCase();
+    const srcExt = item.name.split('.').pop()?.toLowerCase();
+    const isRemuxEligible = item.category === 'video' && (
+      item.settings?.streamCopy ||
+      (item.settings?.scale === 'original' && !item.settings?.mute && (
+        (srcExt === 'mkv' && ext === 'mp4') ||
+        (srcExt === 'mp4' && ext === 'mkv') ||
+        (srcExt === 'mov' && ext === 'mp4') ||
+        (srcExt === 'mp4' && ext === 'mov')
+      ))
+    );
+
+    if (isRemuxEligible) return '~1-2s (Stream Copy)';
+
+    if (!item.duration) {
+      return item.size > 200 * 1024 * 1024 ? 'CPU-bound (~1-3m)' : 'CPU-bound (~few sec)';
+    }
+
+    const multiplier = isMobileDevice ? 2.0 : 0.8;
+    const estSeconds = Math.round(item.duration * multiplier);
+    if (estSeconds < 5) return '~2-5s (CPU-bound)';
+    if (estSeconds < 60) return `~${estSeconds}s (CPU-bound)`;
+    const mins = Math.ceil(estSeconds / 60);
+    return `~${mins}m (CPU-bound)`;
+  };
+
   const HELP_GUIDE = [
-    { h: "01. BATCH INTAKE", p: "Drop multiple files or entire albums into the central buffer to stage a batch queue." },
-    { h: "02. FORMAT TUNING", p: "Select your target format from the sidebar or open 'Tune Parameters' to adjust CRF, bitrates, and scaling." },
-    { h: "03. SYNTHESIS", p: "Execute Synthesis to sequentially transcode items one-by-one with automated WASM RAM garbage collection." },
+    { h: "01. BATCH INTAKE", p: "Drop multiple files or entire albums (Video, Audio, Images) into the central buffer to stage a batch queue." },
+    { h: "02. FORMAT TUNING", p: "Select your target format from the sidebar or open 'Tune Parameters' to adjust CRF, bitrates, scaling, and presets." },
+    { h: "03. SYNTHESIS & ABORT", p: "Execute Synthesis to sequentially transcode items with automated WASM RAM garbage collection. In-flight cancellation is supported at any time without resetting staged files or custom configurations." },
     { h: "04. EXPORT & ZIP", p: "Download artifacts individually or bundle all stabilized files in a single uncompressed ZIP." },
-    { h: "05. HARDWARE PERFORMANCE", p: "Verto runs WebAssembly compiled FFmpeg directly on your local CPU without remote servers. Processing throughput and encoding duration depend entirely on your device's computing capabilities." }
+    { h: "05. HARDWARE PERFORMANCE & WASM BOUNDS", p: "Verto runs WebAssembly compiled FFmpeg directly on your local CPU without remote servers. Transcoding speeds depend on host CPU capabilities, and memory allocations are subject to the 32-bit browser WASM limit (2.0 GB per instance)." }
   ];
   
   const fileInputRef = useRef(null);
@@ -169,6 +247,7 @@ export default function App() {
         file,
         name: file.name,
         size: file.size,
+        duration: null,
         category: cat,
         targetFormat: targetFmt,
         settings: { ...DEFAULT_SETTINGS[cat] },
@@ -189,6 +268,17 @@ export default function App() {
         setSelectedFormat(newItems[0].targetFormat);
       }
       return updated;
+    });
+
+    // Asynchronously probe duration via HTML5 metadata pre-load
+    newItems.forEach(item => {
+      if (item.category === 'video' || item.category === 'audio') {
+        probeMediaMetadata(item.file, item.category).then(meta => {
+          if (meta && meta.duration > 0) {
+            setFileQueue(prev => prev.map(f => f.id === item.id ? { ...f, duration: meta.duration } : f));
+          }
+        });
+      }
     });
   };
 
@@ -212,8 +302,46 @@ export default function App() {
 
   const clearQueue = () => {
     setFileQueue([]);
+    setAbortNotice(null);
     setProgress(0);
     setAppState('idle');
+  };
+
+  const abortSynthesis = async () => {
+    abortRequestedRef.current = true;
+    setStatusText('Halting Worker & Reclaiming Memory...');
+    if (elapsedTimerRef.current) {
+      clearInterval(elapsedTimerRef.current);
+      elapsedTimerRef.current = null;
+    }
+
+    try {
+      if (ffmpeg.loaded) {
+        await ffmpeg.terminate();
+      }
+    } catch (e) {
+      console.warn('Termination notice:', e);
+    }
+
+    // Reset currently transcoding items back to queued
+    setFileQueue(prev => prev.map(item => {
+      if (item.status === 'transcoding') {
+        return { ...item, status: 'queued', progress: 0 };
+      }
+      return item;
+    }));
+
+    setProgress(0);
+    setLiveTelemetry({ fps: null, speed: null, time: null, size: null });
+    setAppState('idle');
+    setAbortNotice('Synthesis aborted. Staged queue and configuration parameters preserved.');
+
+    // Re-initialize engine in background for subsequent execution
+    try {
+      await loadFundamentum();
+    } catch (e) {
+      console.error('Re-init failure:', e);
+    }
   };
 
   const handleFormatSelect = (fmt) => {
@@ -247,6 +375,8 @@ export default function App() {
   };
 
   const executeBatch = async () => {
+    abortRequestedRef.current = false;
+    setAbortNotice(null);
     const pendingItems = fileQueue.filter(f => f.status === 'queued');
     if (pendingItems.length === 0) return;
     
@@ -274,6 +404,7 @@ export default function App() {
     const workingQueue = [...fileQueue];
 
     for (let i = 0; i < workingQueue.length; i++) {
+      if (abortRequestedRef.current) break;
       const item = workingQueue[i];
       if (item.status === 'complete') continue;
 
@@ -309,7 +440,10 @@ export default function App() {
           });
         }
 
+        if (abortRequestedRef.current) break;
+
         const progressListener = ({ progress: p }) => {
+          if (abortRequestedRef.current) return;
           const itemProg = Math.round(p * 100);
           item.progress = itemProg;
           setProgress(itemProg);
@@ -324,11 +458,45 @@ export default function App() {
 
         await ffmpeg.writeFile(inputFileName, await fetchFile(sourceFile));
         
-        const cmdArgs = item.targetFormat.cmd(inputFileName, item.settings);
-        cmdArgs[cmdArgs.length - 1] = outputFileName;
+        if (abortRequestedRef.current) break;
 
-        await ffmpeg.exec(cmdArgs);
+        const srcExt = item.name.split('.').pop()?.toLowerCase();
+        const isEligibleForRemux = item.category === 'video' &&
+          item.settings?.scale === 'original' &&
+          !item.settings?.mute &&
+          (item.settings?.streamCopy || (
+            (srcExt === 'mkv' && outputExt === 'mp4') ||
+            (srcExt === 'mp4' && outputExt === 'mkv') ||
+            (srcExt === 'mov' && outputExt === 'mp4') ||
+            (srcExt === 'mp4' && outputExt === 'mov')
+          ));
+
+        let remuxSuccess = false;
+        if (isEligibleForRemux) {
+          try {
+            setStatusText(`Synthesizing [${i + 1}/${workingQueue.length}]: Remuxing stream (${item.name})...`);
+            const remuxArgs = ['-i', inputFileName, '-c', 'copy'];
+            if (outputExt === 'mp4' || outputExt === 'mov') {
+              remuxArgs.push('-movflags', '+faststart');
+            }
+            remuxArgs.push(outputFileName);
+            await ffmpeg.exec(remuxArgs);
+            remuxSuccess = true;
+          } catch (remuxErr) {
+            console.warn('Smart remux stream-copy incompatible, seamlessly falling back to full transcode:', remuxErr);
+            remuxSuccess = false;
+          }
+        }
+
+        if (!remuxSuccess) {
+          if (abortRequestedRef.current) break;
+          const cmdArgs = item.targetFormat.cmd(inputFileName, item.settings);
+          cmdArgs[cmdArgs.length - 1] = outputFileName;
+          await ffmpeg.exec(cmdArgs);
+        }
         
+        if (abortRequestedRef.current) break;
+
         const data = await ffmpeg.readFile(outputFileName);
         const blob = new Blob([data.buffer], { type: 'application/octet-stream' });
         const outputUrl = URL.createObjectURL(blob);
@@ -348,11 +516,23 @@ export default function App() {
 
         setFileQueue([...workingQueue]);
       } catch (err) {
+        if (abortRequestedRef.current) {
+          console.log('Transcode aborted by operator.');
+          break;
+        }
         console.error(`Transcode failure on ${item.name}:`, err);
+        const errStr = (err && err.message) ? err.message : String(err);
+        const isOOM = /memory access out of bounds|out of memory|allocation failed|RangeError|OOM/i.test(errStr);
         item.status = 'error';
-        item.error = err.message || 'Synthesis breach';
+        item.error = isOOM
+          ? 'WASM Memory Ceiling Reached (2GB 32-bit limit). Reduce resolution or quality preset in Parameter Tuning.'
+          : (err.message || 'Synthesis breach');
         setFileQueue([...workingQueue]);
       }
+    }
+
+    if (abortRequestedRef.current) {
+      return;
     }
 
     if (elapsedTimerRef.current) {
@@ -391,6 +571,7 @@ export default function App() {
     try { if (ffmpeg.loaded) await ffmpeg.terminate(); } catch (e) {}
     setAppState('idle');
     setFileQueue([]);
+    setAbortNotice(null);
     setProgress(0);
     setLiveTelemetry({ fps: null, speed: null, time: null, size: null });
     loadFundamentum();
@@ -667,13 +848,30 @@ export default function App() {
                 </div>
 
                 {/* Local Compute Disclaimer Banner */}
-                <div className="flex items-center gap-2.5 px-3.5 py-2.5 bg-white/[0.015] border border-c-sky/20 rounded-sm mb-6 shrink-0">
+                <div className="flex items-center gap-2.5 px-3.5 py-2.5 bg-white/[0.015] border border-c-sky/20 rounded-sm mb-4 shrink-0">
                   <Cpu className="w-4 h-4 text-c-sky shrink-0" />
                   <p className="text-[0.62rem] text-c-ice/75 leading-relaxed">
                     <span className="mono-ui text-c-sky font-bold mr-1.5">CLIENT-SIDE PROCESSING:</span>
                     Transcoding speed is determined by your local device's CPU and RAM. Processing executes 100% locally in your browser with zero remote servers.
                   </p>
                 </div>
+
+                {/* Abort Notice Banner */}
+                {abortNotice && (
+                  <div className="flex items-center justify-between gap-3 px-3.5 py-2.5 bg-amber-500/10 border border-amber-500/30 rounded-sm mb-4 shrink-0 text-left">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+                      <p className="text-[0.65rem] text-amber-200 mono-ui leading-tight">{abortNotice}</p>
+                    </div>
+                    <button 
+                      type="button" 
+                      onClick={() => setAbortNotice(null)} 
+                      className="text-amber-400 hover:text-white p-1 shrink-0"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                )}
 
                 <input 
                   type="file" 
@@ -737,6 +935,21 @@ export default function App() {
                       </div>
                     </div>
 
+                    {/* WASM Memory Advisory Preflight Banner */}
+                    {largeFileWarningItems.length > 0 && (
+                      <div className="flex items-start gap-3 p-3 bg-amber-950/20 border border-amber-500/30 rounded-sm text-left">
+                        <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                        <div className="space-y-0.5">
+                          <p className="mono-ui text-[0.62rem] font-bold text-amber-300 uppercase tracking-wider">
+                            WASM MEMORY ADVISORY // {largeFileWarningItems.length} {largeFileWarningItems.length === 1 ? 'FILE EXCEEDS' : 'FILES EXCEED'} {isMobileDevice ? '500MB' : '1.5GB'}
+                          </p>
+                          <p className="text-[0.6rem] text-amber-200/80 leading-relaxed">
+                            Notice: Files exceeding 1.5GB push browser WebAssembly 32-bit limits (2GB ceiling). Consider transcoding in chunks or lower resolution if browser halts.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Staged Items List */}
                     <div className="max-h-[300px] overflow-y-auto custom-scrollbar border border-c-steel/20 bg-c-dark/40 rounded-sm divide-y divide-white/5">
                       {fileQueue.map((item, idx) => (
@@ -752,9 +965,18 @@ export default function App() {
                               <p className="text-xs font-bold text-white truncate max-w-[200px] sm:max-w-[320px] md:max-w-[420px]">
                                 {item.name}
                               </p>
-                              <div className="flex items-center gap-2 mt-0.5">
+                              <div className="flex flex-wrap items-center gap-2 mt-0.5">
                                 <span className="mono-ui text-c-steel text-[0.55rem]">{(item.size / 1024 / 1024).toFixed(2)} MB</span>
                                 <span className="mono-ui text-c-sky text-[0.55rem] font-bold">→ {item.targetFormat.label}</span>
+                                <span className="mono-ui text-c-steel/70 text-[0.55rem] border-l border-white/10 pl-2">
+                                  Est. Transcode: {getTranscodeEstimate(item)} | Device RAM: {ramHealthStatus}
+                                </span>
+                                {item.size > (isMobileDevice ? 500 * 1024 * 1024 : 1.5 * 1024 * 1024 * 1024) && (
+                                  <span className="mono-ui text-[0.5rem] px-1.5 py-0.2 bg-amber-500/10 border border-amber-500/30 text-amber-300 rounded-sm font-bold flex items-center gap-1">
+                                    <AlertTriangle className="w-2.5 h-2.5" />
+                                    WASM MEMORY ADVISORY
+                                  </span>
+                                )}
                               </div>
                             </div>
                           </div>
@@ -885,6 +1107,16 @@ export default function App() {
                 <p className="text-sm font-mono text-c-sky uppercase tracking-[0.3em] animate-pulse">
                   {statusText}
                 </p>
+
+                {/* In-Flight Abort Synthesis Action */}
+                <button
+                  type="button"
+                  onClick={abortSynthesis}
+                  className="mt-6 px-6 py-2.5 border border-red-500/40 hover:border-red-400 bg-red-950/20 hover:bg-red-950/40 text-red-400 hover:text-red-300 mono-ui text-xs font-bold uppercase tracking-wider flex items-center gap-2 rounded-sm transition-all shadow-sm"
+                >
+                  <Square className="w-3.5 h-3.5 fill-current" />
+                  Abort Synthesis
+                </button>
               </div>
             )}
 
@@ -1002,8 +1234,34 @@ export default function App() {
               <div className="flex-grow flex flex-col items-center justify-center text-center p-6 md:p-12">
                 <AlertCircle className="w-16 md:w-24 h-16 md:h-24 text-red-400 mb-8" />
                 <h2 className="text-2xl md:text-3xl font-black text-red-200 uppercase tracking-[0.4em] mb-6">Custos Alert</h2>
-                <p className="mono-ui text-red-400 mb-12 max-w-xl">{error}</p>
-                <button onClick={resetVerto} className="px-12 py-4 md:px-16 md:py-5 border border-red-900/50 text-red-300 font-mono uppercase hover:bg-red-900/20">Reset Diagnostics</button>
+                <p className="mono-ui text-red-400 mb-6 max-w-xl">{error}</p>
+
+                {(error.toLowerCase().includes('memory') || error.toLowerCase().includes('oom') || error.toLowerCase().includes('bounds')) && (
+                  <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-sm mb-8 max-w-xl text-left">
+                    <div className="flex items-center gap-2 mb-2 text-amber-300 mono-ui text-xs font-bold">
+                      <AlertTriangle className="w-4 h-4 shrink-0" />
+                      <span>WASM MEMORY RECOVERY RECOMMENDATION</span>
+                    </div>
+                    <p className="text-xs text-amber-200/80 leading-relaxed">
+                      WebAssembly encountered a 32-bit browser address space ceiling (2.0 GB limit). Reduce target output resolution (e.g. 720p or 480p), increase CRF quality value, or choose the <strong>Fast Delivery</strong> preset in Parameter Tuning.
+                    </p>
+                  </div>
+                )}
+
+                <div className="flex flex-col sm:flex-row gap-4">
+                  {fileQueue.length > 0 && (
+                    <button 
+                      onClick={() => { setAppState('idle'); setShowTuneDrawer(true); }}
+                      className="px-8 py-4 border border-c-sky text-c-sky font-mono text-xs uppercase hover:bg-c-sky/10 tracking-widest rounded-sm transition-colors flex items-center justify-center gap-2"
+                    >
+                      <SlidersHorizontal className="w-3.5 h-3.5" />
+                      Tune Parameters & Retry
+                    </button>
+                  )}
+                  <button onClick={resetVerto} className="px-8 py-4 border border-red-900/50 text-red-300 font-mono text-xs uppercase hover:bg-red-900/20 tracking-widest rounded-sm transition-colors">
+                    Reset Diagnostics
+                  </button>
+                </div>
               </div>
             )}
           </div>

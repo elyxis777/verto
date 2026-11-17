@@ -1,5 +1,5 @@
 import React from 'react';
-import { SlidersHorizontal, ChevronDown, ChevronUp, RotateCcw, Sparkles, VolumeX, Volume2 } from 'lucide-react';
+import { SlidersHorizontal, ChevronDown, ChevronUp, RotateCcw, Sparkles, VolumeX, Volume2, Zap } from 'lucide-react';
 import { PRESET_PROFILES, DEFAULT_SETTINGS } from './matrix';
 
 export default function SettingsDrawer({
@@ -79,7 +79,7 @@ export default function SettingsDrawer({
                 RESET DEFAULTS
               </button>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
               {profiles.map((p) => (
                 <button
                   key={p.id}
@@ -202,8 +202,24 @@ export default function SettingsDrawer({
                 </div>
               )}
 
-              {/* Mute Audio Option */}
-              <div className="flex items-center gap-3 self-end py-2">
+              {/* Stream Copy (Remux) & Mute Options */}
+              <div className="flex flex-wrap items-center gap-3 self-end py-2">
+                {!isGif && (
+                  <button
+                    type="button"
+                    onClick={() => updateField('streamCopy', !settings.streamCopy)}
+                    className={`px-3 py-2 flex items-center gap-2 border text-xs font-mono transition-all rounded-sm ${
+                      settings.streamCopy
+                        ? 'bg-c-sky/20 border-c-sky text-c-sky font-bold'
+                        : 'bg-white/[0.02] border-c-steel/30 text-c-steel hover:text-c-ice'
+                    }`}
+                    title="Remux container without re-encoding video frames (~100x faster)"
+                  >
+                    <Zap className="w-3.5 h-3.5" />
+                    <span>{settings.streamCopy ? 'STREAM COPY: ON (-c copy)' : 'STREAM COPY: OFF'}</span>
+                  </button>
+                )}
+
                 <button
                   type="button"
                   onClick={() => updateField('mute', !settings.mute)}
