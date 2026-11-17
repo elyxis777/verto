@@ -2,6 +2,15 @@
 
 All notable changes to the Verto project will be documented in this file.
 
+## [1.2.0] - 2026-11-17 17:35
+
+### Added
+- Multi-File Batch Queue Pipeline: support dropping and staging multiple files with individual and batch status tracking.
+- Sequential FIFO WASM Execution: automated queue processing ensuring single-threaded in-memory execution with zero tab memory exhaustion (OOM protection via immediate `FS.unlink` file recycling).
+- High-Clarity Processing Telemetry HUD: live parsing of `speed`, `fps`, `time`, and `size` directly from FFmpeg log streams with dynamic elapsed timer.
+- Sub-second Pulsating Freeze-Guard Heartbeat: animated indicator providing visual feedback that the background WebAssembly worker is active.
+- Batch Export & ZIP Integration: integrated `jszip` for client-side bundle generation ("Download All as ZIP") alongside individual file retrieval.
+
 ## [1.1.0] - 2026-11-17 01:45
 
 ### Added
