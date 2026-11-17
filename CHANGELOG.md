@@ -11,8 +11,7 @@ All notable changes to the Verto project will be documented in this file.
 - WASM Memory Preflight & Safety Guardrails: Added proactive 32-bit WebAssembly address space warnings for files exceeding 1.5GB (or 500MB on mobile / low RAM devices).
 - Out-Of-Memory Recovery Trap: Structured error interceptor catching `memory access out of bounds` or allocation breaches with direct `Tune Parameters & Retry` workflow.
 - Format Tuning Preset Expansion: Added `Lossless Remux` preset and dedicated `Stream Copy` toggle switch inside `SettingsDrawer`.
-- Updated Documentation: Refined root `README.md` and `PLAN.md` to reflect full implementation of Reddit community testing directives.
-
+- 
 ## [1.2.3] - 2026-11-17 18:42
 
 ### Added
@@ -54,23 +53,17 @@ All notable changes to the Verto project will be documented in this file.
 ## [1.0.16] - 2026-11-17 20:53
 
 ### Added
-- Integrated Smart Stream Copy (`-c copy`) remuxing and preflight duration heuristic checks into `PLAN.md` based on `u/Total-Reasonable` follow-up feedback.
-
 ## [1.0.15] - 2026-11-17 20:10
 
 ### Changed
-- Revised `PLAN.md` with critical real-world architectural solutions from community feedback: in-flight cancellation without reloading the tab, 2GB browser WASM memory preflight warnings, and video conversion capability clarifications.
 
 ## [1.0.14] - 2026-11-17 17:21
 
 ### Changed
-- Rewrote `PLAN.md` from scratch consolidating all real-world Reddit community requirements: Multi-file Batch Queueing, Granular Format Controls (ProRes/CRF/Bitrate), and High-Clarity Processing Telemetry (FPS, ETA, Speed pulse).
 
 ## [1.0.13] - 2026-11-17 01:37
 
 ### Added
-- Formulated `PLAN.md` detailing the granular parameterization engine (CRF quality sliders, ProRes profiles, audio bitrates/channels, GIF resolution/framerates) in response to initial community feedback.
-
 ## [1.0.12] - 2026-11-16 22:28
 
 ### Added
@@ -131,8 +124,6 @@ All notable changes to the Verto project will be documented in this file.
 
 ### Fixed
 - Hardened unload beacon dispatch in `App.jsx` with exception suppression for cross-origin or standalone web clients.
-- Corrected path mapping in `DEPLOYMENT_PLAN.md` referencing `Machina/verto-core`.
-
 ## [1.0.3] - 2026-11-08 10:10
 
 ### Fixed
