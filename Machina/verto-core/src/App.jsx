@@ -4,7 +4,7 @@ import {
   FileAudio, FileVideo, Zap, Image as ImageIcon, 
   Search, Check, X, Activity, HardDrive, Maximize2, Info, Power,
   ShieldCheck, Coffee, Infinity as InfinityIcon,
-  Archive, Trash2, Plus, Clock, Gauge, Play
+  Archive, Trash2, Plus, Clock, Gauge, Play, Globe
 } from 'lucide-react';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile, toBlobURL } from '@ffmpeg/util';
@@ -438,6 +438,18 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-4 border-l border-c-steel/10 pl-6 h-8">
+            {/* Elyxis Main Portal */}
+            <a 
+              href="https://elyxis.pages.dev/" 
+              target="_blank" 
+              rel="noreferrer noopener"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-c-sky/10 border border-c-sky/30 hover:border-c-sky hover:bg-c-sky/20 text-c-sky rounded-sm transition-all text-[0.55rem] mono-ui font-bold"
+              title="Visit the Elyxis ecosystem"
+            >
+              <Globe className="w-3 h-3 text-c-sky" />
+              <span>ELYXIS.DEV</span>
+            </a>
+
             {/* Ko-fi Support Badge */}
             <a 
               href="https://ko-fi.com/elyxis" 
@@ -528,9 +540,15 @@ export default function App() {
           {/* Sidebar */}
           <div className="w-full md:w-[320px] border-b md:border-b-0 md:border-r border-c-steel/20 bg-c-dark/30 p-6 md:p-8 flex flex-col shrink-0">
             <header className="mb-6 md:mb-10 w-fit">
-              <div className="flex justify-between mb-1 mono-ui text-white opacity-80">
+              <a 
+                href="https://elyxis.pages.dev/" 
+                target="_blank" 
+                rel="noreferrer noopener"
+                className="flex justify-between mb-1 mono-ui text-white opacity-80 hover:opacity-100 hover:text-c-sky transition-all group"
+                title="Visit Elyxis Central Portal"
+              >
                 <span>E</span><span>L</span><span>Y</span><span>X</span><span>I</span><span>S</span>
-              </div>
+              </a>
               <h1 className="text-3xl md:text-5xl font-black leading-none flex gap-2">
                 <span className="text-c-slate">V</span><span className="text-c-steel">E</span><span className="text-c-sky">R</span><span className="text-c-ice">T</span><span className="text-c-white">O</span>
               </h1>
@@ -923,14 +941,25 @@ export default function App() {
                       <p className="text-[0.65rem] text-c-ice leading-relaxed">
                         Transcoded 100% locally on your machine with zero server uploads, no data harvesting, and no subscription paywalls.
                       </p>
-                      <a 
-                        href="https://ko-fi.com/elyxis" 
-                        target="_blank" 
-                        rel="noreferrer noopener"
-                        className="inline-flex items-center gap-1.5 mono-ui text-[0.6rem] text-amber-300 hover:text-amber-200 uppercase font-bold tracking-wider hover:underline"
-                      >
-                        Buy the developer a coffee on Ko-fi →
-                      </a>
+                      <div className="flex flex-wrap items-center gap-4 pt-1">
+                        <a 
+                          href="https://ko-fi.com/elyxis" 
+                          target="_blank" 
+                          rel="noreferrer noopener"
+                          className="inline-flex items-center gap-1.5 mono-ui text-[0.6rem] text-amber-300 hover:text-amber-200 uppercase font-bold tracking-wider hover:underline"
+                        >
+                          Buy the developer a coffee on Ko-fi →
+                        </a>
+                        <a 
+                          href="https://elyxis.pages.dev/" 
+                          target="_blank" 
+                          rel="noreferrer noopener"
+                          className="inline-flex items-center gap-1.5 mono-ui text-[0.6rem] text-c-sky hover:text-white uppercase font-bold tracking-wider hover:underline"
+                        >
+                          <Globe className="w-2.5 h-2.5" />
+                          Elyxis Central Hub →
+                        </a>
+                      </div>
                     </div>
                   </div>
                 </div>

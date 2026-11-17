@@ -5,7 +5,7 @@
 
 ---
 
-### [🚀 Open Live Web App](https://verto-eta.vercel.app)
+### [🚀 Open Live Web App](https://verto-eta.vercel.app) • [🌐 Elyxis Portal](https://elyxis.pages.dev/)
 
 ---
 
@@ -54,11 +54,12 @@ You are free to inspect, audit, and run the code. Proprietary closed-source fork
 
 ---
 
-## Support & Open Source
+## Support & Ecosystem
 
-Verto is built and maintained as an independent local-first utility.  
-If it saved you time or a cloud subscription, consider supporting development:
+Verto is an open-source project within the Elyxis ecosystem.  
+Explore more independent, privacy-first software at the main portal:
 
+🌐 **[Elyxis Central Portal](https://elyxis.pages.dev/)**  
 ☕ **[Support on Ko-fi](https://ko-fi.com/elyxis)**
 
 ---

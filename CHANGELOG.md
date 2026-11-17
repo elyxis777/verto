@@ -2,6 +2,11 @@
 
 All notable changes to the Verto project will be documented in this file.
 
+## [1.2.1] - 2026-11-17 17:50
+
+### Added
+- Integrated official Elyxis central portal (`https://elyxis.pages.dev/`) into the persistent top HUD navigation bar (`ELYXIS.DEV`), interactive sidebar branding, success view footer, and documentation.
+
 ## [1.2.0] - 2026-11-17 17:35
 
 ### Added
